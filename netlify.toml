@@ -1,0 +1,7 @@
+[build]
+  publish = "projeto Açougue-Corrigido (1)/projeto Açougue01/projeto Açougue01"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
