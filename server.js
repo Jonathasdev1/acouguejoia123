@@ -25,12 +25,7 @@ app.use((req, res, next) => {
 });
 
 // Bloco 4.1: define pasta oficial do frontend e publica arquivos estaticos.
-const WEB_ROOT = path.join(
-	__dirname,
-	"projeto Açougue-Corrigido (1)",
-	"projeto Açougue01",
-	"projeto Açougue01"
-);
+const WEB_ROOT = path.join(__dirname, "public");
 app.use(express.static(WEB_ROOT));
 
 // Bloco 5: normaliza nome para evitar duplicidade por acento/hifen/espaco.
@@ -825,7 +820,10 @@ app.get("/clientes", (req, res) => {
 	res.status(200).json(clientes);
 });
 
-// Bloco 16: inicia o servidor e exibe URL local no terminal.
+// Bloco 16: Carrega rotas de autenticação e relatórios
+require('./auth-routes');
+
+// Bloco 17: inicia o servidor e exibe URL local no terminal.
 app.listen(PORT, () => {
 	console.log(`Servidor rodando em http://localhost:${PORT}`);
 });

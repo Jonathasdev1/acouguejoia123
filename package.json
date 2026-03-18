@@ -1,15 +1,15 @@
 {
-  "name": "api",
+  "name": "ze-da-carne-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "API de Açougue Online - Zé da Carne",
+  "main": "server-auth.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "node server-auth.js",
+    "dev": "node server-auth.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["acougue", "ecommerce", "carnes"],
+  "author": "Jonathas Dev",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

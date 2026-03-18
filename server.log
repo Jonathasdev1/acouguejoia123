@@ -1,0 +1,5 @@
+
+> ze-da-carne-api@1.0.0 start
+> node server-auth.js
+
+Servidor rodando em http://localhost:3000
