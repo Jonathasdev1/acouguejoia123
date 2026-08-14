@@ -56,86 +56,254 @@ const app = {
     },
 
     setupEventListeners() {
-        document.addEventListener('click', (e) => {
-            const target = e.target;
+    // ================================================================
+    // CLIQUES
+    // ================================================================
+    document.addEventListener('click', (e) => {
 
-            // Navegação
-            if (target.classList.contains('nav-link')) {
-                e.preventDefault();
-                this.currentPage = target.dataset.page;
+        // ------------------------------------------------------------
+        // Navegação
+        // ------------------------------------------------------------
+        const navLink = e.target.closest('.nav-link');
+
+        if (navLink) {
+            e.preventDefault();
+
+            const page = navLink.dataset.page;
+
+            if (page) {
+                this.currentPage = page;
                 this.render();
             }
 
-            // Login
-            if (target.id === 'btn-login') {
-                e.preventDefault();
-                this.handleLogin();
-            }
+            return;
+        }
 
-            // Registro
-            if (target.id === 'btn-register') {
-                e.preventDefault();
-                this.handleRegister();
-            }
+        // ------------------------------------------------------------
+        // Login
+        // ------------------------------------------------------------
+        const loginButton = e.target.closest('#btn-login');
 
-            // Logout
-            if (target.id === 'btn-logout') {
-                e.preventDefault();
-                this.logout();
-            }
+        if (loginButton) {
+            e.preventDefault();
+            this.handleLogin();
+            return;
+        }
 
-            // Adicionar ao carrinho
-            if (target.classList.contains('add-to-cart')) {
-                e.preventDefault();
-                const productId = parseInt(target.dataset.productId);
+        // ------------------------------------------------------------
+        // Registro
+        // ------------------------------------------------------------
+        const registerButton = e.target.closest('#btn-register');
+
+        if (registerButton) {
+            e.preventDefault();
+            this.handleRegister();
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // Logout
+        // ------------------------------------------------------------
+        const logoutButton = e.target.closest('#btn-logout');
+
+        if (logoutButton) {
+            e.preventDefault();
+            this.logout();
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // Adicionar ao carrinho
+        // ------------------------------------------------------------
+        const addButton = e.target.closest('.add-to-cart');
+
+        if (addButton) {
+            e.preventDefault();
+
+            const productId = parseInt(addButton.dataset.productId);
+
+            if (!isNaN(productId)) {
                 this.addToCart(productId);
             }
 
-            // Remover do carrinho
-            if (target.classList.contains('remove-from-cart')) {
-                e.preventDefault();
-                const cartIndex = parseInt(target.dataset.cartIndex);
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // REMOVER DO CARRINHO
+        // ------------------------------------------------------------
+        const removeButton = e.target.closest('.remove-from-cart');
+
+        if (removeButton) {
+            e.preventDefault();
+
+            const cartIndex = parseInt(removeButton.dataset.cartIndex);
+
+            if (!isNaN(cartIndex)) {
                 this.removeFromCart(cartIndex);
             }
 
-            // Finalizar pedido
-            if (target.id === 'btn-checkout') {
-                e.preventDefault();
-                this.currentPage = 'checkout';
-                this.render();
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // DIMINUIR QUANTIDADE (-)
+        // ------------------------------------------------------------
+        const decreaseButton = e.target.closest('.quantity-decrease');
+
+        if (decreaseButton) {
+            e.preventDefault();
+
+            const cartIndex = parseInt(decreaseButton.dataset.cartIndex);
+
+            if (!isNaN(cartIndex) && this.cart[cartIndex]) {
+                const newQuantity = this.cart[cartIndex].quantity - 1;
+
+                this.updateCartQuantity(cartIndex, newQuantity);
             }
 
-            // Confirmar pedido
-            if (target.id === 'btn-confirm-order') {
-                e.preventDefault();
-                this.handleConfirmOrder();
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // AUMENTAR QUANTIDADE (+)
+        // ------------------------------------------------------------
+        const increaseButton = e.target.closest('.quantity-increase');
+
+        if (increaseButton) {
+            e.preventDefault();
+
+            const cartIndex = parseInt(increaseButton.dataset.cartIndex);
+
+            if (!isNaN(cartIndex) && this.cart[cartIndex]) {
+                const newQuantity = this.cart[cartIndex].quantity + 1;
+
+                this.updateCartQuantity(cartIndex, newQuantity);
             }
 
-            // Filtrar por categoria
-            if (target.classList.contains('category-filter')) {
-                e.preventDefault();
-                const category = target.dataset.category;
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // Finalizar pedido
+        // ------------------------------------------------------------
+        const checkoutButton = e.target.closest('#btn-checkout');
+
+        if (checkoutButton) {
+            e.preventDefault();
+
+            this.currentPage = 'checkout';
+            this.render();
+
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // Confirmar pedido
+        // ------------------------------------------------------------
+        const confirmOrderButton = e.target.closest('#btn-confirm-order');
+
+        if (confirmOrderButton) {
+            e.preventDefault();
+            this.handleConfirmOrder();
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // Filtrar categoria
+        // ------------------------------------------------------------
+        const categoryButton = e.target.closest('.category-filter');
+
+        if (categoryButton) {
+            e.preventDefault();
+
+            const category = categoryButton.dataset.category;
+
+            if (category) {
                 this.filterByCategory(category);
             }
 
-            // Admin - Adicionar produto
-            if (target.id === 'btn-add-product') {
-                e.preventDefault();
-                this.showAddProductModal();
-            }
+            return;
+        }
 
-            // Admin - Salvar produto
-            if (target.id === 'btn-save-product') {
-                e.preventDefault();
-                this.handleSaveProduct();
-            }
+        // ------------------------------------------------------------
+        // Admin - Adicionar produto
+        // ------------------------------------------------------------
+        const addProductButton = e.target.closest('#btn-add-product');
 
-            // Admin - Exportar relatório
-            if (target.id === 'btn-export-report') {
-                e.preventDefault();
-                this.exportReport();
+        if (addProductButton) {
+            e.preventDefault();
+            this.showAddProductModal();
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // Admin - Salvar produto
+        // ------------------------------------------------------------
+        const saveProductButton = e.target.closest('#btn-save-product');
+
+        if (saveProductButton) {
+            e.preventDefault();
+            this.handleSaveProduct();
+            return;
+        }
+
+        // ------------------------------------------------------------
+        // Admin - Exportar relatório
+        // ------------------------------------------------------------
+        const exportReportButton = e.target.closest('#btn-export-report');
+
+        if (exportReportButton) {
+            e.preventDefault();
+            this.exportReport();
+            return;
+        }
+    });
+
+
+    // ================================================================
+    // ALTERAÇÃO DE QUANTIDADE PELO INPUT
+    // ================================================================
+    document.addEventListener('change', (e) => {
+
+        const quantityInput = e.target.closest('.cart-quantity');
+
+        if (quantityInput) {
+
+            const cartIndex = parseInt(quantityInput.dataset.cartIndex);
+            const quantity = parseInt(quantityInput.value);
+
+            if (!isNaN(cartIndex) && !isNaN(quantity)) {
+                this.updateCartQuantity(cartIndex, quantity);
             }
-        });
+        }
+    });
+
+
+    // ================================================================
+    // ATUALIZAR QUANTIDADE NO CARRINHO
+    // ================================================================
+
+    document.addEventListener('change', (e) => {
+
+        const quantityInput = e.target.closest('.cart-quantity');
+
+        if (quantityInput) {
+
+            const cartIndex = parseInt(
+                quantityInput.dataset.cartIndex
+            );
+
+            const quantity = parseInt(
+                quantityInput.value
+            );
+
+            if (!isNaN(cartIndex) && !isNaN(quantity)) {
+                this.updateCartQuantity(cartIndex, quantity);
+            }
+        }
+    });
+
 
         // Atualizar quantidade no carrinho
         document.addEventListener('change', (e) => {
@@ -239,26 +407,46 @@ const app = {
     // ========================================================================
 
     addToCart(productId) {
-        const product = this.products.find(p => p.id === productId);
-        if (!product) return;
+    console.time('addToCart TOTAL');
 
-        const existingItem = this.cart.find(item => item.id === productId);
+    const product = this.products.find(p => p.id === productId);
 
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            this.cart.push({
-                id: product.id,
-                name: product.nome,
-                price: product.preco,
-                quantity: 1
-            });
-        }
+    if (!product) {
+        console.timeEnd('addToCart TOTAL');
+        return;
+    }
 
-        this.saveToStorage();
-        this.showAlert(`${product.nome} adicionado ao carrinho!`, 'success');
-        this.render();
-    },
+    console.time('cart');
+
+    const existingItem = this.cart.find(item => item.id === productId);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        this.cart.push({
+            id: product.id,
+            name: product.nome,
+            price: product.preco,
+            quantity: 1
+        });
+    }
+
+    console.timeEnd('cart');
+
+    console.time('saveToStorage');
+    this.saveToStorage();
+    console.timeEnd('saveToStorage');
+
+    console.time('showAlert');
+    this.showAlert(`${product.nome} adicionado ao carrinho!`, 'success');
+    console.timeEnd('showAlert');
+
+    console.time('render');
+    this.render();
+    console.timeEnd('render');
+
+    console.timeEnd('addToCart TOTAL');
+},
 
     removeFromCart(index) {
         this.cart.splice(index, 1);
@@ -267,13 +455,30 @@ const app = {
     },
 
     updateCartQuantity(index, quantity) {
-        if (quantity <= 0) {
-            this.removeFromCart(index);
-        } else {
-            this.cart[index].quantity = quantity;
-            this.saveToStorage();
-            this.render();
+
+        // Verifica se o item existe
+        if (!this.cart[index]) {
+            return;
         }
+
+        // Garante que seja número
+        quantity = parseInt(quantity);
+
+        // Se for inválido ou menor que 1,
+        // remove o produto do carrinho
+        if (isNaN(quantity) || quantity <= 0) {
+            this.removeFromCart(index);
+            return;
+        }
+
+        // Atualiza quantidade
+        this.cart[index].quantity = quantity;
+
+        // Salva no localStorage
+        this.saveToStorage();
+
+        // Atualiza a tela
+        this.render();
     },
 
     getCartTotal() {
@@ -719,16 +924,25 @@ const app = {
                 <div class="categories-sidebar">
                     <h3>Categorias</h3>
                     <ul class="category-list">
-                        <li class="category-item ${!this.currentCategory || this.currentCategory === 'todos' ? 'active' : ''}" data-category="todos">
-                            <a href="#" class="category-filter" data-category="todos">Todos</a>
+                        <li
+                            class="category-item ${!this.currentCategory || this.currentCategory === 'todos' ? 'active' : ''} category-filter"
+                            data-category="todos"
+                        >
+                            <a href="#" data-category="todos">
+                                Todos
+                            </a>
                         </li>
+
                         ${categories.map(cat => `
-                    <li class="category-item ${this.currentCategory === cat ? 'active' : ''}">
-                        <a href="#" class="category-filter" data-category="${cat}">
-                            ${this.formatCategory(cat)}
-                        </a>
-                    </li>
-                `).join('')}
+                            <li
+                                class="category-item ${this.currentCategory === cat ? 'active' : ''} category-filter"
+                                data-category="${cat}"
+                            >
+                                <a href="#" data-category="${cat}">
+                                    ${this.formatCategory(cat)}
+                                </a>
+                            </li>
+                        `).join('')}
                     </ul>
                 </div>
                 <div>
@@ -768,70 +982,156 @@ const app = {
     },
 
     renderCart() {
-        if (this.cart.length === 0) {
-            return `
-                <div class="empty-cart">
-                    <i class="fas fa-shopping-cart"></i>
-                    <h2>Seu carrinho está vazio</h2>
-                    <p>Adicione alguns produtos deliciosos!</p>
-                    <a href="#" class="nav-link btn btn-primary mt-3" data-page="catalog">Voltar ao Catálogo</a>
-                </div>
-            `;
-        }
-
-        const total = this.getCartTotal();
-        const subtotal = total;
-        const taxa = total * 0.1;
-        const totalComTaxa = subtotal + taxa;
-
+    if (this.cart.length === 0) {
         return `
-            <div class="cart-container">
-                <div class="cart-items">
-                    <h2>Seu Carrinho</h2>
-                    ${this.cart.map((item, index) => `
-                        <div class="cart-item">
-                            <div class="cart-item-image">
-                                <i class="fas fa-drumstick-bite"></i>
-                            </div>
-                            <div class="cart-item-details">
-                                <div class="cart-item-name">${item.name}</div>
-                                <div class="cart-item-price">R$ ${item.price.toFixed(2)}</div>
-                            </div>
-                            <div class="quantity-control">
-                                <button type="button">-</button>
-                                <input type="number" class="cart-quantity" data-cart-index="${index}" value="${item.quantity}" min="1">
-                                <button type="button">+</button>
-                            </div>
-                            <div style="text-align: right; min-width: 100px;">
-                                <div style="font-weight: bold; margin-bottom: 0.5rem;">R$ ${(item.price * item.quantity).toFixed(2)}</div>
-                                <button class="btn btn-small remove-from-cart" data-cart-index="${index}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="cart-summary">
-                    <h3>Resumo</h3>
-                    <div class="summary-item">
-                        <span>Subtotal:</span>
-                        <span>R$ ${subtotal.toFixed(2)}</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Taxa de Entrega:</span>
-                        <span>R$ ${taxa.toFixed(2)}</span>
-                    </div>
-                    <div class="summary-item total">
-                        <span>Total:</span>
-                        <span>R$ ${totalComTaxa.toFixed(2)}</span>
-                    </div>
-                    <button id="btn-checkout" class="btn btn-success btn-block mt-3">
-                        <i class="fas fa-credit-card"></i> Finalizar Compra
-                    </button>
-                </div>
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <h2>Seu carrinho está vazio</h2>
+                <p>Adicione alguns produtos deliciosos!</p>
+
+                <a href="#"
+                   class="nav-link btn btn-primary mt-3"
+                   data-page="catalog">
+                    Voltar ao Catálogo
+                </a>
             </div>
         `;
-    },
+    }
+
+    const total = this.getCartTotal();
+    const subtotal = total;
+    const taxa = total * 0.1;
+    const totalComTaxa = subtotal + taxa;
+
+    return `
+        <div class="cart-container">
+
+            <div class="cart-items">
+
+                <h2>Seu Carrinho</h2>
+
+                ${this.cart.map((item, index) => `
+
+                    <div class="cart-item">
+
+                        <!-- IMAGEM -->
+                        <div class="cart-item-image">
+                            <i class="fas fa-drumstick-bite"></i>
+                        </div>
+
+                        <!-- INFORMAÇÕES -->
+                        <div class="cart-item-details">
+
+                            <div class="cart-item-name">
+                                ${item.name}
+                            </div>
+
+                            <div class="cart-item-price">
+                                R$ ${item.price.toFixed(2)}
+                            </div>
+
+                        </div>
+
+                        <!-- CONTROLE DE QUANTIDADE -->
+                        <div class="quantity-control">
+
+                            <!-- DIMINUIR -->
+                            <button
+                                type="button"
+                                class="quantity-decrease"
+                                data-cart-index="${index}"
+                                aria-label="Diminuir quantidade"
+                            >
+                                -
+                            </button>
+
+                            <!-- QUANTIDADE -->
+                            <input
+                                type="number"
+                                class="cart-quantity"
+                                data-cart-index="${index}"
+                                value="${item.quantity}"
+                                min="1"
+                            >
+
+                            <!-- AUMENTAR -->
+                            <button
+                                type="button"
+                                class="quantity-increase"
+                                data-cart-index="${index}"
+                                aria-label="Aumentar quantidade"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                        <!-- TOTAL DO ITEM -->
+                        <div style="
+                            text-align: right;
+                            min-width: 100px;
+                        ">
+
+                            <div style="
+                                font-weight: bold;
+                                margin-bottom: 0.5rem;
+                            ">
+                                R$ ${(item.price * item.quantity).toFixed(2)}
+                            </div>
+
+                            <!-- REMOVER -->
+                            <button
+                                type="button"
+                                class="btn btn-small remove-from-cart"
+                                data-cart-index="${index}"
+                                aria-label="Remover produto"
+                            >
+                                <i class="fas fa-trash"></i>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `).join('')}
+
+            </div>
+
+
+            <!-- RESUMO DO CARRINHO -->
+            <div class="cart-summary">
+
+                <h3>Resumo</h3>
+
+                <div class="summary-item">
+                    <span>Subtotal:</span>
+                    <span>R$ ${subtotal.toFixed(2)}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span>Taxa de Entrega:</span>
+                    <span>R$ ${taxa.toFixed(2)}</span>
+                </div>
+
+                <div class="summary-item total">
+                    <span>Total:</span>
+                    <span>R$ ${totalComTaxa.toFixed(2)}</span>
+                </div>
+
+                <button
+                    id="btn-checkout"
+                    class="btn btn-success btn-block mt-3"
+                    type="button"
+                >
+                    <i class="fas fa-credit-card"></i>
+                    Finalizar Compra
+                </button>
+
+            </div>
+
+        </div>
+    `;
+},
 
     renderCheckout() {
         const total = this.getCartTotal();
