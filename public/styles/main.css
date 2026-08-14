@@ -139,6 +139,12 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
+    
+}
+
+.category-item a{
+    text-decoration: none;
+    color: black;
 }
 
 .category-item:hover {
@@ -511,6 +517,20 @@ body {
     background-color: #bbdefb;
     color: #0d47a1;
     border-left: 4px solid var(--secondary-color);
+}
+
+#alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    width: 350px;
+    max-width: calc(100vw - 40px);
 }
 
 /* Tabelas */
