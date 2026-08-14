@@ -1002,14 +1002,14 @@ const app = {
             </div>
         `;
 
-        const alertContainer = document.querySelector('.main-content') || document.body;
+        const alertContainer = document.querySelector('#alert-container');
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = alertHTML;
         alertContainer.insertBefore(tempDiv.firstElementChild, alertContainer.firstChild);
 
-        setTimeout(() => {
-            const alert = document.getElementById(alertId);
-            if (alert) alert.remove();
+        setTimeout(() => { 
+            const alert = document.getElementById(alertId); 
+            if (alert) alert.remove(); 
         }, 3000);
     }
 };
