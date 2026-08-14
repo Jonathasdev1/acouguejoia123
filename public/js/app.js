@@ -36,13 +36,13 @@ const app = {
     loadFromStorage() {
         const user = localStorage.getItem(STORAGE_KEYS.USER);
         const cart = localStorage.getItem(STORAGE_KEYS.CART);
-        
+
         if (user) {
             this.currentUser = JSON.parse(user);
             this.currentPage = 'catalog';
             this.isAdmin = this.currentUser.role === 'admin';
         }
-        
+
         if (cart) {
             this.cart = JSON.parse(cart);
         }
@@ -723,10 +723,12 @@ const app = {
                             <a href="#" class="category-filter" data-category="todos">Todos</a>
                         </li>
                         ${categories.map(cat => `
-                            <li class="category-item ${this.currentCategory === cat ? 'active' : ''}">
-                                <a href="#" class="category-filter" data-category="${cat}">${cat}</a>
-                            </li>
-                        `).join('')}
+                    <li class="category-item ${this.currentCategory === cat ? 'active' : ''}">
+                        <a href="#" class="category-filter" data-category="${cat}">
+                            ${this.formatCategory(cat)}
+                        </a>
+                    </li>
+                `).join('')}
                     </ul>
                 </div>
                 <div>
@@ -739,7 +741,7 @@ const app = {
                                 </div>
                                 <div class="product-info">
                                     <h3 class="product-name">${product.nome}</h3>
-                                    <p class="product-category">${product.categoria}</p>
+                                    <p class="product-category">${this.formatCategory(product.categoria)}</p>
                                     <p class="product-price">R$ ${product.preco.toFixed(2)}</p>
                                     <button class="btn btn-primary btn-block add-to-cart" data-product-id="${product.id}">
                                         <i class="fas fa-plus"></i> Adicionar
@@ -751,6 +753,18 @@ const app = {
                 </div>
             </div>
         `;
+    },
+
+    formatCategory(category) {
+        const categories = {
+            bovino: 'Bovino',
+            suino: 'Suíno',
+            frango: 'Frango',
+            rotisseria: 'Rotisseria',
+            conveniencia: 'Conveniência'
+    };
+
+    return categories[category] || category;
     },
 
     renderCart() {
@@ -1007,9 +1021,9 @@ const app = {
         tempDiv.innerHTML = alertHTML;
         alertContainer.insertBefore(tempDiv.firstElementChild, alertContainer.firstChild);
 
-        setTimeout(() => { 
-            const alert = document.getElementById(alertId); 
-            if (alert) alert.remove(); 
+        setTimeout(() => {
+            const alert = document.getElementById(alertId);
+            if (alert) alert.remove();
         }, 3000);
     }
 };
