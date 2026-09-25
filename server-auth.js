@@ -2,6 +2,8 @@
 // ZÉ DA CARNE - SERVIDOR BACKEND COM AUTENTICAÇÃO E RELATÓRIOS
 // ============================================================================
 
+require("dotenv").config();
+
 const express = require("express");
 const path = require("path");
 const { db } = require("./db");
@@ -86,6 +88,84 @@ app.get("/api/status", (req, res) => {
 
 app.get("/health", (req, res) => {
 	res.status(200).json({ healthy: true });
+});
+
+// ============================================================================
+// GOOGLE PLACES - BUSCAR JÓIA BOUTIQUE DE CARNES
+// ============================================================================
+
+app.get("/api/avaliacoes-google", async (req, res) => {
+	try {
+		const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+		const placeId = process.env.GOOGLE_PLACE_ID;
+
+		if (!apiKey) {
+			return res.status(500).json({
+				error: "GOOGLE_PLACES_API_KEY não configurada"
+			});
+		}
+
+		if (!placeId) {
+			return res.status(500).json({
+				error: "GOOGLE_PLACE_ID não configurado"
+			});
+		}
+
+		const response = await fetch(
+			`https://places.googleapis.com/v1/places/${placeId}`,
+			{
+				method: "GET",
+				headers: {
+					"X-Goog-Api-Key": apiKey,
+					"X-Goog-FieldMask": [
+						"displayName",
+						"rating",
+						"userRatingCount",
+						"googleMapsUri"
+					].join(",")
+				}
+			}
+		);
+
+		const data = await response.json();
+
+		console.log("RESPOSTA COMPLETA DO GOOGLE:");
+		console.log(JSON.stringify(data, null, 2));
+
+		if (!response.ok) {
+			console.error("Erro Google Places:", data);
+
+			return res.status(response.status).json({
+				error: "Erro ao buscar avaliações no Google",
+				detalhes: data
+			});
+		}
+
+		const avaliacoes = (data.reviews || []).map((review) => ({
+			nome: review.authorAttribution?.displayName || "Cliente",
+			foto: review.authorAttribution?.photoUri || null,
+			nota: review.rating || 0,
+			texto: review.text?.text || "",
+			data: review.relativePublishTimeDescription || "",
+			dataPublicacao: review.publishTime || null,
+			googleMaps: review.authorAttribution?.uri || null
+		}));
+
+		res.json({
+			nome: data.displayName?.text || "",
+			nota: data.rating || 0,
+			totalAvaliacoes: data.userRatingCount || 0,
+			googleMaps: data.googleMapsUri || "",
+			avaliacoes: []
+		});
+
+	} catch (error) {
+		console.error("Erro ao consultar avaliações Google:", error);
+
+		res.status(500).json({
+			error: "Erro interno ao consultar avaliações do Google"
+		});
+	}
 });
 
 // ============================================================================

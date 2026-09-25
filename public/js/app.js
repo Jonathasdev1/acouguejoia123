@@ -2,6 +2,13 @@
 // ZÉ DA CARNE - APLICATIVO DE AÇOUGUE ONLINE
 // Sistema completo com autenticação, catálogo, carrinho, pedidos e relatórios
 // ============================================================================
+import { state } from './state.js';
+import {
+    handleLogin,
+    handleRegister,
+    logout
+} from './auth.js';
+import { loadFromStorage } from './storage.js';
 
 // ============================================================================
 // 1. CONFIGURAÇÃO E CONSTANTES
@@ -28,24 +35,9 @@ const app = {
     isAdmin: false,
 
     init() {
-        this.loadFromStorage();
+        loadFromStorage();
         this.setupEventListeners();
         this.render();
-    },
-
-    loadFromStorage() {
-        const user = localStorage.getItem(STORAGE_KEYS.USER);
-        const cart = localStorage.getItem(STORAGE_KEYS.CART);
-
-        if (user) {
-            this.currentUser = JSON.parse(user);
-            this.currentPage = 'catalog';
-            this.isAdmin = this.currentUser.role === 'admin';
-        }
-
-        if (cart) {
-            this.cart = JSON.parse(cart);
-        }
     },
 
     saveToStorage() {
@@ -86,7 +78,13 @@ const app = {
 
         if (loginButton) {
             e.preventDefault();
-            this.handleLogin();
+
+
+            handleLogin(
+                this.showAlert.bind(this),
+                this.render.bind(this)
+            );
+
             return;
         }
 
@@ -97,7 +95,12 @@ const app = {
 
         if (registerButton) {
             e.preventDefault();
-            this.handleRegister();
+
+            handleRegister(
+                this.showAlert.bind(this),
+                this.render.bind(this)
+            );
+
             return;
         }
 
@@ -108,7 +111,12 @@ const app = {
 
         if (logoutButton) {
             e.preventDefault();
-            this.logout();
+
+            logout(
+                this.showAlert.bind(this),
+                this.render.bind(this)
+            );
+
             return;
         }
 
@@ -315,92 +323,6 @@ const app = {
         });
     },
 
-    // ========================================================================
-    // 3. AUTENTICAÇÃO
-    // ========================================================================
-
-    async handleLogin() {
-        const email = document.getElementById('login-email')?.value;
-        const password = document.getElementById('login-password')?.value;
-
-        if (!email || !password) {
-            this.showAlert('Por favor, preencha todos os campos', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.currentUser = data.user;
-                this.isAdmin = data.user.role === 'admin';
-                this.currentPage = 'catalog';
-                this.saveToStorage();
-                this.showAlert('Login realizado com sucesso!', 'success');
-                this.render();
-            } else {
-                this.showAlert(data.error || 'Erro ao fazer login', 'error');
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            this.showAlert('Erro ao conectar com o servidor', 'error');
-        }
-    },
-
-    async handleRegister() {
-        const name = document.getElementById('register-name')?.value;
-        const email = document.getElementById('register-email')?.value;
-        const phone = document.getElementById('register-phone')?.value;
-        const password = document.getElementById('register-password')?.value;
-        const confirmPassword = document.getElementById('register-confirm-password')?.value;
-
-        if (!name || !email || !phone || !password || !confirmPassword) {
-            this.showAlert('Por favor, preencha todos os campos', 'error');
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            this.showAlert('As senhas não conferem', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, phone, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.showAlert('Cadastro realizado com sucesso! Faça login agora.', 'success');
-                this.currentPage = 'login';
-                this.render();
-            } else {
-                this.showAlert(data.error || 'Erro ao registrar', 'error');
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            this.showAlert('Erro ao conectar com o servidor', 'error');
-        }
-    },
-
-    logout() {
-        this.currentUser = null;
-        this.cart = [];
-        this.currentPage = 'login';
-        localStorage.removeItem(STORAGE_KEYS.USER);
-        localStorage.removeItem(STORAGE_KEYS.CART);
-        this.showAlert('Logout realizado com sucesso', 'success');
-        this.render();
-    },
 
     // ========================================================================
     // 4. CARRINHO DE COMPRAS
@@ -666,21 +588,25 @@ const app = {
     async render() {
         const root = document.getElementById('root');
 
-        if (!this.currentUser) {
+        if (!state.currentUser) {
             root.innerHTML = this.renderAuthPage();
         } else {
             await this.loadProducts();
             await this.loadOrders();
-            if (this.isAdmin) await this.loadClients();
+
+            if (state.isAdmin) {
+                await this.loadClients();
+            }
 
             root.innerHTML = this.renderMainApp();
         }
     },
 
     renderAuthPage() {
-        if (this.currentPage === 'register') {
+        if (state.currentPage === 'register') {
             return this.renderRegisterPage();
         }
+
         return this.renderLoginPage();
     },
 
@@ -884,7 +810,7 @@ const app = {
                         <a href="#" class="nav-link" data-page="orders">
                             <i class="fas fa-list"></i> Meus Pedidos
                         </a>
-                        ${this.isAdmin ? `
+                        ${state.isAdmin ? `
                             <a href="#" class="nav-link" data-page="admin">
                                 <i class="fas fa-cog"></i> Admin
                             </a>
@@ -899,17 +825,24 @@ const app = {
     },
 
     renderPage() {
-        switch (this.currentPage) {
+        switch (state.currentPage) {
             case 'catalog':
                 return this.renderCatalog();
+
             case 'cart':
                 return this.renderCart();
+
             case 'checkout':
                 return this.renderCheckout();
+
             case 'orders':
                 return this.renderOrders();
+
             case 'admin':
-                return this.isAdmin ? this.renderAdmin() : this.renderCatalog();
+                return state.isAdmin
+                    ? this.renderAdmin()
+                    : this.renderCatalog();
+
             default:
                 return this.renderCatalog();
         }
