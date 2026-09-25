@@ -216,9 +216,11 @@ Para dúvidas ou problemas, entre em contato através do repositório GitHub.
 
 ISC
 
-## Autor
+## Autores
 
 Jonathas Dev - [GitHub](https://github.com/Jonathasdev1)
+
+Luan Prado - [GitHub](https://github.com/LztPrado)
 
 ---
 
