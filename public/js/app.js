@@ -48,269 +48,269 @@ const app = {
     },
 
     setupEventListeners() {
-    // ================================================================
-    // CLIQUES
-    // ================================================================
-    document.addEventListener('click', (e) => {
+        // ================================================================
+        // CLIQUES
+        // ================================================================
+        document.addEventListener('click', (e) => {
 
-        // ------------------------------------------------------------
-        // Navegação
-        // ------------------------------------------------------------
-        const navLink = e.target.closest('.nav-link');
+            // ------------------------------------------------------------
+            // Navegação
+            // ------------------------------------------------------------
+            const navLink = e.target.closest('.nav-link');
 
-        if (navLink) {
-            e.preventDefault();
+            if (navLink) {
+                e.preventDefault();
 
-            const page = navLink.dataset.page;
+                const page = navLink.dataset.page;
 
-            if (page) {
-                this.currentPage = page;
+                if (page) {
+                    state.currentPage = page;
+                    this.render();
+                }
+
+                return;
+            }
+
+            // ------------------------------------------------------------
+            // Login
+            // ------------------------------------------------------------
+            const loginButton = e.target.closest('#btn-login');
+
+            if (loginButton) {
+                e.preventDefault();
+
+
+                handleLogin(
+                    this.showAlert.bind(this),
+                    this.render.bind(this)
+                );
+
+                return;
+            }
+
+            // ------------------------------------------------------------
+            // Registro
+            // ------------------------------------------------------------
+            const registerButton = e.target.closest('#btn-register');
+
+            if (registerButton) {
+                e.preventDefault();
+
+                handleRegister(
+                    this.showAlert.bind(this),
+                    this.render.bind(this)
+                );
+
+                return;
+            }
+
+            // ------------------------------------------------------------
+            // Logout
+            // ------------------------------------------------------------
+            const logoutButton = e.target.closest('#btn-logout');
+
+            if (logoutButton) {
+                e.preventDefault();
+
+                logout(
+                    this.showAlert.bind(this),
+                    this.render.bind(this)
+                );
+
+                return;
+            }
+
+            // ------------------------------------------------------------
+            // Adicionar ao carrinho
+            // ------------------------------------------------------------
+            const addButton = e.target.closest('.add-to-cart');
+
+            if (addButton) {
+                e.preventDefault();
+
+                const productId = parseInt(addButton.dataset.productId);
+
+                if (!isNaN(productId)) {
+                    this.addToCart(productId);
+                }
+
+                return;
+            }
+
+            // ------------------------------------------------------------
+            // REMOVER DO CARRINHO
+            // ------------------------------------------------------------
+            const removeButton = e.target.closest('.remove-from-cart');
+
+            if (removeButton) {
+                e.preventDefault();
+
+                const cartIndex = parseInt(removeButton.dataset.cartIndex);
+
+                if (!isNaN(cartIndex)) {
+                    this.removeFromCart(cartIndex);
+                }
+
+                return;
+            }
+
+            // ------------------------------------------------------------
+            // DIMINUIR QUANTIDADE (-)
+            // ------------------------------------------------------------
+            const decreaseButton = e.target.closest('.quantity-decrease');
+
+            if (decreaseButton) {
+                e.preventDefault();
+
+                const cartIndex = parseInt(decreaseButton.dataset.cartIndex);
+
+                if (!isNaN(cartIndex) && this.cart[cartIndex]) {
+                    const newQuantity = this.cart[cartIndex].quantity - 1;
+
+                    this.updateCartQuantity(cartIndex, newQuantity);
+                }
+
+                return;
+            }
+
+            // ------------------------------------------------------------
+            // AUMENTAR QUANTIDADE (+)
+            // ------------------------------------------------------------
+            const increaseButton = e.target.closest('.quantity-increase');
+
+            if (increaseButton) {
+                e.preventDefault();
+
+                const cartIndex = parseInt(increaseButton.dataset.cartIndex);
+
+                if (!isNaN(cartIndex) && this.cart[cartIndex]) {
+                    const newQuantity = this.cart[cartIndex].quantity + 1;
+
+                    this.updateCartQuantity(cartIndex, newQuantity);
+                }
+
+                return;
+            }
+
+            // ------------------------------------------------------------
+            // Finalizar pedido
+            // ------------------------------------------------------------
+            const checkoutButton = e.target.closest('#btn-checkout');
+
+            if (checkoutButton) {
+                e.preventDefault();
+
+                this.currentPage = 'checkout';
                 this.render();
+
+                return;
             }
 
-            return;
-        }
+            // ------------------------------------------------------------
+            // Confirmar pedido
+            // ------------------------------------------------------------
+            const confirmOrderButton = e.target.closest('#btn-confirm-order');
 
-        // ------------------------------------------------------------
-        // Login
-        // ------------------------------------------------------------
-        const loginButton = e.target.closest('#btn-login');
-
-        if (loginButton) {
-            e.preventDefault();
-
-
-            handleLogin(
-                this.showAlert.bind(this),
-                this.render.bind(this)
-            );
-
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // Registro
-        // ------------------------------------------------------------
-        const registerButton = e.target.closest('#btn-register');
-
-        if (registerButton) {
-            e.preventDefault();
-
-            handleRegister(
-                this.showAlert.bind(this),
-                this.render.bind(this)
-            );
-
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // Logout
-        // ------------------------------------------------------------
-        const logoutButton = e.target.closest('#btn-logout');
-
-        if (logoutButton) {
-            e.preventDefault();
-
-            logout(
-                this.showAlert.bind(this),
-                this.render.bind(this)
-            );
-
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // Adicionar ao carrinho
-        // ------------------------------------------------------------
-        const addButton = e.target.closest('.add-to-cart');
-
-        if (addButton) {
-            e.preventDefault();
-
-            const productId = parseInt(addButton.dataset.productId);
-
-            if (!isNaN(productId)) {
-                this.addToCart(productId);
+            if (confirmOrderButton) {
+                e.preventDefault();
+                this.handleConfirmOrder();
+                return;
             }
 
-            return;
-        }
+            // ------------------------------------------------------------
+            // Filtrar categoria
+            // ------------------------------------------------------------
+            const categoryButton = e.target.closest('.category-filter');
 
-        // ------------------------------------------------------------
-        // REMOVER DO CARRINHO
-        // ------------------------------------------------------------
-        const removeButton = e.target.closest('.remove-from-cart');
+            if (categoryButton) {
+                e.preventDefault();
 
-        if (removeButton) {
-            e.preventDefault();
+                const category = categoryButton.dataset.category;
 
-            const cartIndex = parseInt(removeButton.dataset.cartIndex);
+                if (category) {
+                    this.filterByCategory(category);
+                }
 
-            if (!isNaN(cartIndex)) {
-                this.removeFromCart(cartIndex);
+                return;
             }
 
-            return;
-        }
+            // ------------------------------------------------------------
+            // Admin - Adicionar produto
+            // ------------------------------------------------------------
+            const addProductButton = e.target.closest('#btn-add-product');
 
-        // ------------------------------------------------------------
-        // DIMINUIR QUANTIDADE (-)
-        // ------------------------------------------------------------
-        const decreaseButton = e.target.closest('.quantity-decrease');
-
-        if (decreaseButton) {
-            e.preventDefault();
-
-            const cartIndex = parseInt(decreaseButton.dataset.cartIndex);
-
-            if (!isNaN(cartIndex) && this.cart[cartIndex]) {
-                const newQuantity = this.cart[cartIndex].quantity - 1;
-
-                this.updateCartQuantity(cartIndex, newQuantity);
+            if (addProductButton) {
+                e.preventDefault();
+                this.showAddProductModal();
+                return;
             }
 
-            return;
-        }
+            // ------------------------------------------------------------
+            // Admin - Salvar produto
+            // ------------------------------------------------------------
+            const saveProductButton = e.target.closest('#btn-save-product');
 
-        // ------------------------------------------------------------
-        // AUMENTAR QUANTIDADE (+)
-        // ------------------------------------------------------------
-        const increaseButton = e.target.closest('.quantity-increase');
-
-        if (increaseButton) {
-            e.preventDefault();
-
-            const cartIndex = parseInt(increaseButton.dataset.cartIndex);
-
-            if (!isNaN(cartIndex) && this.cart[cartIndex]) {
-                const newQuantity = this.cart[cartIndex].quantity + 1;
-
-                this.updateCartQuantity(cartIndex, newQuantity);
+            if (saveProductButton) {
+                e.preventDefault();
+                this.handleSaveProduct();
+                return;
             }
 
-            return;
-        }
+            // ------------------------------------------------------------
+            // Admin - Exportar relatório
+            // ------------------------------------------------------------
+            const exportReportButton = e.target.closest('#btn-export-report');
 
-        // ------------------------------------------------------------
-        // Finalizar pedido
-        // ------------------------------------------------------------
-        const checkoutButton = e.target.closest('#btn-checkout');
-
-        if (checkoutButton) {
-            e.preventDefault();
-
-            this.currentPage = 'checkout';
-            this.render();
-
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // Confirmar pedido
-        // ------------------------------------------------------------
-        const confirmOrderButton = e.target.closest('#btn-confirm-order');
-
-        if (confirmOrderButton) {
-            e.preventDefault();
-            this.handleConfirmOrder();
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // Filtrar categoria
-        // ------------------------------------------------------------
-        const categoryButton = e.target.closest('.category-filter');
-
-        if (categoryButton) {
-            e.preventDefault();
-
-            const category = categoryButton.dataset.category;
-
-            if (category) {
-                this.filterByCategory(category);
+            if (exportReportButton) {
+                e.preventDefault();
+                this.exportReport();
+                return;
             }
-
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // Admin - Adicionar produto
-        // ------------------------------------------------------------
-        const addProductButton = e.target.closest('#btn-add-product');
-
-        if (addProductButton) {
-            e.preventDefault();
-            this.showAddProductModal();
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // Admin - Salvar produto
-        // ------------------------------------------------------------
-        const saveProductButton = e.target.closest('#btn-save-product');
-
-        if (saveProductButton) {
-            e.preventDefault();
-            this.handleSaveProduct();
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // Admin - Exportar relatório
-        // ------------------------------------------------------------
-        const exportReportButton = e.target.closest('#btn-export-report');
-
-        if (exportReportButton) {
-            e.preventDefault();
-            this.exportReport();
-            return;
-        }
-    });
+        });
 
 
-    // ================================================================
-    // ALTERAÇÃO DE QUANTIDADE PELO INPUT
-    // ================================================================
-    document.addEventListener('change', (e) => {
+        // ================================================================
+        // ALTERAÇÃO DE QUANTIDADE PELO INPUT
+        // ================================================================
+        document.addEventListener('change', (e) => {
 
-        const quantityInput = e.target.closest('.cart-quantity');
+            const quantityInput = e.target.closest('.cart-quantity');
 
-        if (quantityInput) {
+            if (quantityInput) {
 
-            const cartIndex = parseInt(quantityInput.dataset.cartIndex);
-            const quantity = parseInt(quantityInput.value);
+                const cartIndex = parseInt(quantityInput.dataset.cartIndex);
+                const quantity = parseInt(quantityInput.value);
 
-            if (!isNaN(cartIndex) && !isNaN(quantity)) {
-                this.updateCartQuantity(cartIndex, quantity);
+                if (!isNaN(cartIndex) && !isNaN(quantity)) {
+                    this.updateCartQuantity(cartIndex, quantity);
+                }
             }
-        }
-    });
+        });
 
 
-    // ================================================================
-    // ATUALIZAR QUANTIDADE NO CARRINHO
-    // ================================================================
+        // ================================================================
+        // ATUALIZAR QUANTIDADE NO CARRINHO
+        // ================================================================
 
-    document.addEventListener('change', (e) => {
+        document.addEventListener('change', (e) => {
 
-        const quantityInput = e.target.closest('.cart-quantity');
+            const quantityInput = e.target.closest('.cart-quantity');
 
-        if (quantityInput) {
+            if (quantityInput) {
 
-            const cartIndex = parseInt(
-                quantityInput.dataset.cartIndex
-            );
+                const cartIndex = parseInt(
+                    quantityInput.dataset.cartIndex
+                );
 
-            const quantity = parseInt(
-                quantityInput.value
-            );
+                const quantity = parseInt(
+                    quantityInput.value
+                );
 
-            if (!isNaN(cartIndex) && !isNaN(quantity)) {
-                this.updateCartQuantity(cartIndex, quantity);
+                if (!isNaN(cartIndex) && !isNaN(quantity)) {
+                    this.updateCartQuantity(cartIndex, quantity);
+                }
             }
-        }
-    });
+        });
 
 
         // Atualizar quantidade no carrinho
@@ -329,46 +329,46 @@ const app = {
     // ========================================================================
 
     addToCart(productId) {
-    console.time('addToCart TOTAL');
+        console.time('addToCart TOTAL');
 
-    const product = this.products.find(p => p.id === productId);
+        const product = this.products.find(p => p.id === productId);
 
-    if (!product) {
+        if (!product) {
+            console.timeEnd('addToCart TOTAL');
+            return;
+        }
+
+        console.time('cart');
+
+        const existingItem = this.cart.find(item => item.id === productId);
+
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            this.cart.push({
+                id: product.id,
+                name: product.nome,
+                price: product.preco,
+                quantity: 1
+            });
+        }
+
+        console.timeEnd('cart');
+
+        console.time('saveToStorage');
+        this.saveToStorage();
+        console.timeEnd('saveToStorage');
+
+        console.time('showAlert');
+        this.showAlert(`${product.nome} adicionado ao carrinho!`, 'success');
+        console.timeEnd('showAlert');
+
+        console.time('render');
+        this.render();
+        console.timeEnd('render');
+
         console.timeEnd('addToCart TOTAL');
-        return;
-    }
-
-    console.time('cart');
-
-    const existingItem = this.cart.find(item => item.id === productId);
-
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        this.cart.push({
-            id: product.id,
-            name: product.nome,
-            price: product.preco,
-            quantity: 1
-        });
-    }
-
-    console.timeEnd('cart');
-
-    console.time('saveToStorage');
-    this.saveToStorage();
-    console.timeEnd('saveToStorage');
-
-    console.time('showAlert');
-    this.showAlert(`${product.nome} adicionado ao carrinho!`, 'success');
-    console.timeEnd('showAlert');
-
-    console.time('render');
-    this.render();
-    console.timeEnd('render');
-
-    console.timeEnd('addToCart TOTAL');
-},
+    },
 
     removeFromCart(index) {
         this.cart.splice(index, 1);
@@ -909,14 +909,14 @@ const app = {
             frango: 'Frango',
             rotisseria: 'Rotisseria',
             conveniencia: 'Conveniência'
-    };
+        };
 
-    return categories[category] || category;
+        return categories[category] || category;
     },
 
     renderCart() {
-    if (this.cart.length === 0) {
-        return `
+        if (this.cart.length === 0) {
+            return `
             <div class="empty-cart">
                 <i class="fas fa-shopping-cart"></i>
                 <h2>Seu carrinho está vazio</h2>
@@ -929,14 +929,14 @@ const app = {
                 </a>
             </div>
         `;
-    }
+        }
 
-    const total = this.getCartTotal();
-    const subtotal = total;
-    const taxa = total * 0.1;
-    const totalComTaxa = subtotal + taxa;
+        const total = this.getCartTotal();
+        const subtotal = total;
+        const taxa = total * 0.1;
+        const totalComTaxa = subtotal + taxa;
 
-    return `
+        return `
         <div class="cart-container">
 
             <div class="cart-items">
@@ -1064,7 +1064,7 @@ const app = {
 
         </div>
     `;
-},
+    },
 
     renderCheckout() {
         const total = this.getCartTotal();
