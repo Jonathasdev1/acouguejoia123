@@ -44,7 +44,7 @@ const app = {
         if (this.currentUser) {
             localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(this.currentUser));
         }
-        localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(this.cart));
+        localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(state.cart));
     },
 
     setupEventListeners() {
@@ -164,8 +164,8 @@ const app = {
 
                 const cartIndex = parseInt(decreaseButton.dataset.cartIndex);
 
-                if (!isNaN(cartIndex) && this.cart[cartIndex]) {
-                    const newQuantity = this.cart[cartIndex].quantity - 1;
+                if (!isNaN(cartIndex) && state.cart[cartIndex]) {
+                    const newQuantity = state.cart[cartIndex].quantity - 1;
 
                     this.updateCartQuantity(cartIndex, newQuantity);
                 }
@@ -183,8 +183,8 @@ const app = {
 
                 const cartIndex = parseInt(increaseButton.dataset.cartIndex);
 
-                if (!isNaN(cartIndex) && this.cart[cartIndex]) {
-                    const newQuantity = this.cart[cartIndex].quantity + 1;
+                if (!isNaN(cartIndex) && state.cart[cartIndex]) {
+                    const newQuantity = state.cart[cartIndex].quantity + 1;
 
                     this.updateCartQuantity(cartIndex, newQuantity);
                 }
@@ -331,7 +331,7 @@ const app = {
     addToCart(productId) {
         console.time('addToCart TOTAL');
 
-        const product = this.products.find(p => p.id === productId);
+        const product = state.products.find(p => p.id === productId);
 
         if (!product) {
             console.timeEnd('addToCart TOTAL');
@@ -340,12 +340,12 @@ const app = {
 
         console.time('cart');
 
-        const existingItem = this.cart.find(item => item.id === productId);
+        const existingItem = state.cart.find(item => item.id === productId);
 
         if (existingItem) {
             existingItem.quantity += 1;
         } else {
-            this.cart.push({
+            state.cart.push({
                 id: product.id,
                 name: product.nome,
                 price: product.preco,
@@ -371,7 +371,7 @@ const app = {
     },
 
     removeFromCart(index) {
-        this.cart.splice(index, 1);
+        state.cart.splice(index, 1);
         this.saveToStorage();
         this.render();
     },
@@ -379,7 +379,7 @@ const app = {
     updateCartQuantity(index, quantity) {
 
         // Verifica se o item existe
-        if (!this.cart[index]) {
+        if (!state.cart[index]) {
             return;
         }
 
@@ -394,7 +394,7 @@ const app = {
         }
 
         // Atualiza quantidade
-        this.cart[index].quantity = quantity;
+        state.cart[index].quantity = quantity;
 
         // Salva no localStorage
         this.saveToStorage();
@@ -404,11 +404,11 @@ const app = {
     },
 
     getCartTotal() {
-        return this.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        return state.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     },
 
     getCartCount() {
-        return this.cart.reduce((count, item) => count + item.quantity, 0);
+        return state.cart.reduce((count, item) => count + item.quantity, 0);
     },
 
     // ========================================================================
@@ -416,7 +416,7 @@ const app = {
     // ========================================================================
 
     async handleConfirmOrder() {
-        if (this.cart.length === 0) {
+        if (state.cart.length === 0) {
             this.showAlert('Seu carrinho está vazio', 'error');
             return;
         }
@@ -441,7 +441,7 @@ const app = {
                 tipo_entrega: deliveryType,
                 endereco_entrega: address || null,
                 observacao: observation || null,
-                itens: this.cart.map(item => ({
+                itens: state.cart.map(item => ({
                     produto_id: item.id,
                     quantidade: item.quantity,
                     preco_unitario: item.price,
@@ -459,7 +459,7 @@ const app = {
 
             if (response.ok) {
                 this.showAlert(`Pedido #${data.numero_pedido} criado com sucesso!`, 'success');
-                this.cart = [];
+                state.cart = [];
                 this.saveToStorage();
                 this.currentPage = 'orders';
                 this.render();
@@ -490,8 +490,9 @@ const app = {
     async loadProducts() {
         try {
             const response = await fetch(`${API_BASE_URL}/produtos`);
+
             if (response.ok) {
-                this.products = await response.json();
+                state.products = await response.json();
             }
         } catch (error) {
             console.error('Erro ao carregar produtos:', error);
@@ -506,9 +507,12 @@ const app = {
 
     getFilteredProducts() {
         if (!this.currentCategory || this.currentCategory === 'todos') {
-            return this.products;
+            return state.products;
         }
-        return this.products.filter(p => p.categoria === this.currentCategory);
+
+        return state.products.filter(
+            p => p.categoria === this.currentCategory
+        );
     },
 
     // ========================================================================
@@ -849,7 +853,7 @@ const app = {
     },
 
     renderCatalog() {
-        const categories = [...new Set(this.products.map(p => p.categoria))];
+        const categories = [...new Set(state.products.map(p => p.categoria))];
         const filteredProducts = this.getFilteredProducts();
 
         return `
@@ -915,7 +919,7 @@ const app = {
     },
 
     renderCart() {
-        if (this.cart.length === 0) {
+        if (state.cart.length === 0) {
             return `
             <div class="empty-cart">
                 <i class="fas fa-shopping-cart"></i>
@@ -943,7 +947,7 @@ const app = {
 
                 <h2>Seu Carrinho</h2>
 
-                ${this.cart.map((item, index) => `
+                ${state.cart.map((item, index) => `
 
                     <div class="cart-item">
 
@@ -1172,7 +1176,7 @@ const app = {
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                     <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: var(--shadow); text-align: center;">
                         <i class="fas fa-box" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem; display: block;"></i>
-                        <h3>${this.products.length}</h3>
+                        <h3>${state.products.length}</h3>
                         <p>Produtos</p>
                     </div>
                     <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: var(--shadow); text-align: center;">
